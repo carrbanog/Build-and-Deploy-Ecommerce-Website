@@ -1,54 +1,66 @@
-document.addEventListener("DOMContentLoaded", function(){
-  const cartItemContainer = document.querySelector("#cart-items");
-  // console.log(cartItemContainer);
-  const cartItem = JSON.parse(localStorage.getItem("cartItem"));
-  // console.log(cartItem);
-  if(cartItem){
-    const newRow = document.createElement("tr");
-    newRow.innerHTML += `
-          <td><i class="fa-regular fa-circle-xmark"></i></td>
-            <td><img src="${cartItem.image}" alt=""></td>
-            <td>${cartItem.name}</td>
-            <td>${cartItem.price}</td>
-            <td><input type="number" value="1"></td>
-            <td>${cartItem.price}</td>
+const tbody = document.querySelector("#cart-items");
+const cartSubtotal = document.querySelector("#cartSubtotal");
+const shipping = document.querySelector("#shipping");
+const resultSection = document.querySelector("#result");
+
+
+const cartItem = JSON.parse(localStorage.getItem("cartItem"));
+
+let allPrice = 0;
+
+function drawList(){
+  for(let i=0; i<cartItem.length; i++){
+    let tr = document.createElement("tr");
+    tr.innerHTML += `
+    <td><i class="fa-regular fa-circle-xmark"></i></td>
+    <td><img src="${cartItem[i].image}" alt=""></td>
+    <td>${cartItem[i].name}</td>
+    <td>${cartItem[i].price}</td>
+    <td><input type="number" value="1"></td>
+    <td class="subtotal">${cartItem[i].price}</td>
     `
-    cartItemContainer.appendChild(newRow);
+    tbody.appendChild(tr);
   }
-})
+}
+drawList();
 
-document.addEventListener("DOMContentLoaded", function(){
-  const newCart = document.querySelector(".cart");
-  if(newCart){
-    newCart.addEventListener("click", function(){
-      const productName = document.querySelector(".product-name").textContent;
-      const productImage = document.querySelector(".product-image").getAttribute("src");
-      const productPrice = document.querySelector(".product-price").textContent;
-      const cartItem = {
-        name: productName,
-        price: productPrice,
-        image: productImage,
-      }
-      console.log(cartItem);
-    
-      localStorage.setItem("cartItem", JSON.stringify(cartItem));
-      window.location.href = "cart.html";
-    }) 
-  }
-})
+const deleteBtn = document.querySelectorAll(".fa-circle-xmark");
+// console.log(deleteBtn.parentElement.parentElement.remove());
+for(let i=0; i<deleteBtn.length; i++){
+  deleteBtn[i].addEventListener("click", deleteList);
+}
 
-// const newCart = document.querySelector(".cart");
-// newCart.addEventListener("click", function(){
-//   const productName = document.querySelector(".product-name").textContent;
-//   const productImage = document.querySelector(".product-image").getAttribute("src");
-//   const productPrice = document.querySelector(".product-price").textContent;
-//   const cartItem = {
-//     name: productName,
-//     price: productPrice,
-//     image: productImage,
-//   }
-//   console.log(cartItem);
+function deleteList(e){
+  // console.log(e.target.parentElement.parentElement);
+  let targetList = e.target.parentElement.parentElement;
+  targetList.remove();
+  minus(targetList);
 
-//   localStorage.setItem("cartItem", JSON.stringify(cartItem));
-//   window.location.href = "cart.html";
-// })
+}
+// 가격 빼기
+function minus(targetList){
+  const minusPrice = targetList.querySelector(".subtotal").textContent.replace("$", "");
+  let allMinusPrice = allPrice - minusPrice;
+  cartSubtotal.innerHTML = allMinusPrice;
+  resultSection.innerHTML = allMinusPrice;
+  carculate(allPrice);
+}
+
+function carculate(allPrice){
+  const subtotal = document.querySelectorAll(".subtotal");
+// const intSubtotal = parseInt(subtotal.replace("$", ""));
+for(let i=0; i<subtotal.length; i++){
+  // console.log(subtotal[i].textContent);
+  const intPrice = parseInt(subtotal[i].textContent.replace("$", ""));
+  // console.log(intPrice);
+  allPrice = allPrice + intPrice
+}
+cartSubtotal.innerHTML = allPrice;
+if(shipping.textContent === "Free"){
+  allPrice += 0;
+}else{
+  allPrice = allPrice + parseInt(shipping.textContent);
+}
+resultSection.innerHTML = allPrice;
+}
+
